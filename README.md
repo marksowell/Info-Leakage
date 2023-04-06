@@ -7,6 +7,8 @@ To improve the efficiency of the testing process, the extension also includes a 
 
 Overall, this Burp extension provides a simple but effective way to identify potential information leakage vulnerabilities in web applications, helping security professionals to better protect their systems and data.
 
+![Screenshot](images/screenshot.png)
+
 ## Requirements
 
 Ensure you have Burp Suite installed on your system. You can download the free Community edition or purchase the Professional edition from the official website: https://portswigger.net/burp
