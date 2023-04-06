@@ -107,7 +107,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         about_panel.add(about_label, gbc)
     
         # Add the author label
-        author_label = JLabel("Author: Your Name")
+        author_label = JLabel("Author: Mark Sowell")
         gbc.gridy = 1
         about_panel.add(author_label, gbc)
     
