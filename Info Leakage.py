@@ -18,6 +18,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         self._initUI()
         callbacks.customizeUiComponent(self._main_panel)
         callbacks.addSuiteTab(self)
+        self._load_grep_strings()
 
     def _get_matches(self, response, match):
         matches = []
@@ -35,20 +36,23 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
 
     def doPassiveScan(self, baseRequestResponse):
         issues = []
-        for grep_string in GREP_STRINGS:
-            # Add the 'utf-8' encoding to the bytearray
-            matches = self._get_matches(baseRequestResponse.getResponse(), bytearray(grep_string, 'utf-8'))
-            if (len(matches) > 0):
-                print("Match found for string:", grep_string)
-                issue = CustomScanIssue(
-                    baseRequestResponse.getHttpService(),
-                    self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
-                    [self._callbacks.applyMarkers(baseRequestResponse, None, matches)],
-                    "Info Leakage",
-                    "The response contains the string: " + grep_string,
-                    "High"
-                )
-                issues.append(issue)
+        grep_strings = self._callbacks.loadExtensionSetting("grep_strings")
+        if grep_strings:
+            grep_strings_list = json.loads(grep_strings)
+            for grep_string in grep_strings_list:
+                # Add the 'utf-8' encoding to the bytearray
+                matches = self._get_matches(baseRequestResponse.getResponse(), bytearray(grep_string, 'utf-8'))
+                if (len(matches) > 0):
+                    print("Match found for string:", grep_string)
+                    issue = CustomScanIssue(
+                        baseRequestResponse.getHttpService(),
+                        self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
+                        [self._callbacks.applyMarkers(baseRequestResponse, None, matches)],
+                        "Info Leakage",
+                        "The response contains the string: " + grep_string,
+                        "High"
+                    )
+                    issues.append(issue)
     
         return issues if issues else None
 
@@ -61,58 +65,58 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
     def _initUI(self):
         self._main_panel = JPanel()
         tabbedPane = JTabbedPane()
-    
+
         # Settings tab
         settings_panel = JPanel()
         settings_panel.setLayout(awt.GridBagLayout())
         gbc = awt.GridBagConstraints()
-    
+
         info_label = JLabel("Enter one search term per line:")
         gbc.gridx = 0
         gbc.gridy = 0
         gbc.gridwidth = 3
         settings_panel.add(info_label, gbc)
-    
+
         self._grep_strings_area = JTextArea(15, 60)
         gbc.gridy = 1
         settings_panel.add(JScrollPane(self._grep_strings_area), gbc)
-    
+
         gbc.gridwidth = 1
-    
+
         gbc.insets = awt.Insets(10, 10, 10, 10)
-    
+
         save_button = JButton("Save", actionPerformed=self._save_grep_strings)
         gbc.gridx = 0
         gbc.gridy = 2
         settings_panel.add(save_button, gbc)
-    
+
         import_button = JButton("Import", actionPerformed=self._import_grep_strings)
         gbc.gridx = 1
         settings_panel.add(import_button, gbc)
-    
+
         export_button = JButton("Export", actionPerformed=self._export_grep_strings)
         gbc.gridx = 2
         settings_panel.add(export_button, gbc)
-    
+
         tabbedPane.addTab("Settings", settings_panel)
-    
+
         # About tab
         about_panel = JPanel()
         about_panel.setLayout(awt.GridBagLayout())
         gbc = awt.GridBagConstraints()
-    
-        about_label = JLabel("Info Leakage Burp Extension - version 1.0")
+
+        about_label = JLabel("Info Leakage Burp Extension - version 1.1")
         gbc.gridx = 0
         gbc.gridy = 0
         about_panel.add(about_label, gbc)
-    
+
         # Add the author label
         author_label = JLabel("Author: Mark Sowell")
         gbc.gridy = 1
         about_panel.add(author_label, gbc)
-    
+
         tabbedPane.addTab("About", about_panel)
-    
+
         self._main_panel.add(tabbedPane)
 
     def _import_grep_strings(self, event):
@@ -125,13 +129,21 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
     def _export_grep_strings(self, event):
         file_chooser = JFileChooser()
         if file_chooser.showSaveDialog(None) == JFileChooser.APPROVE_OPTION:
-            with open(            file_chooser.getSelectedFile().getAbsolutePath(), "w") as f:
+            with open(file_chooser.getSelectedFile().getAbsolutePath(), "w") as f:
                 grep_strings = self._grep_strings_area.getText().split("\n")
                 json.dump(grep_strings, f)
 
     def _save_grep_strings(self, event):
         global GREP_STRINGS
         GREP_STRINGS = self._grep_strings_area.getText().split("\n")
+        self._callbacks.saveExtensionSetting("grep_strings", json.dumps(GREP_STRINGS))
+
+    def _load_grep_strings(self):
+        global GREP_STRINGS
+        grep_strings_str = self._callbacks.loadExtensionSetting("grep_strings")
+        if grep_strings_str:
+            GREP_STRINGS = json.loads(grep_strings_str)
+            self._grep_strings_area.setText("\n".join(GREP_STRINGS))
 
     # Implement ITab
     def getTabCaption(self):
