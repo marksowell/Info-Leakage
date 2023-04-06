@@ -105,7 +105,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         about_panel.setLayout(awt.GridBagLayout())
         gbc = awt.GridBagConstraints()
 
-        about_label = JLabel("Info Leakage Burp Extension - version 1.1")
+        about_label = JLabel("Info Leakage Burp Extension - version 1.1.0")
         gbc.gridx = 0
         gbc.gridy = 0
         about_panel.add(about_label, gbc)
