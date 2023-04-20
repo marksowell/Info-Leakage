@@ -45,3 +45,8 @@ Now the extension is installed, and you can use it to find information leakages 
 The ```sensitive_info_terms.json``` file provides 20 sensitive information terms that you can search for in HTTP responses. Keep in mind that this list is not exhaustive, and it's essential to adjust the search terms based on the specific application or environment you are testing. This file can be imported in the Info Leakage tab under settings.
 
 When using these search terms, it's important to understand that false positives can occur. Be sure to carefully review and validate each finding to ensure it's a legitimate information leakage.
+
+***Check out my other Burp Suite extension [Findings Tracker](https://github.com/marksowell/Findings-Tracker)***
+
+## License
+The scripts and documentation in this project are released under the [MIT License](LICENSE)
