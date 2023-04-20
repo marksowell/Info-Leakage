@@ -1,4 +1,6 @@
-# Info Leakage
+<p align="center"><img src="images/icon.svg" height="120px" />
+<h1 align="center">Info Leakage</h1></p>
+
 This Burp extension is designed to perform passive security testing against web applications using Burp Suite. Specifically, it searches for instances of sensitive strings in the response body of HTTP requests, and flags them as potential information leakage vulnerabilities.
 
 The extension allows users to define a list of strings to search for, and when a match is found, it creates a custom scan issue containing details of the vulnerability, such as the name of the string that was found and the severity of the issue.
