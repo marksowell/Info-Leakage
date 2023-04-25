@@ -2,8 +2,9 @@ from burp import IBurpExtender, IScannerCheck, IScanIssue, ITab
 from array import array
 import json
 import java.awt as awt
-from javax.swing import JPanel, JScrollPane, JTextArea, JButton, JFileChooser, JLabel, JTabbedPane
+from javax.swing import JPanel, JScrollPane, JTextArea, JButton, JFileChooser, JLabel, JTabbedPane, JOptionPane
 
+VERSION = "1.0.5"
 # Replace GREP_STRINGS with an empty list to be populated via the UI
 GREP_STRINGS = []
 
@@ -12,13 +13,16 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
     def registerExtenderCallbacks(self, callbacks):
         self._callbacks = callbacks
         self._helpers = callbacks.getHelpers()
-        callbacks.setExtensionName("Info Leakage")
+        callbacks.setExtensionName("Info Leakage - " + VERSION)
         callbacks.registerScannerCheck(self)
 
         self._initUI()
         callbacks.customizeUiComponent(self._main_panel)
         callbacks.addSuiteTab(self)
+        self.grep_strings_list = []
         self._load_grep_strings()
+
+        print("Info Leakage - version {} loaded successfully".format(VERSION))
 
     def _get_matches(self, response, match):
         matches = []
@@ -36,28 +40,23 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
 
     def doPassiveScan(self, baseRequestResponse):
         issues = []
-        grep_strings = self._callbacks.loadExtensionSetting("grep_strings")
-        if grep_strings:
-            grep_strings_list = json.loads(grep_strings)
-            for grep_string in grep_strings_list:
-                # Add the 'utf-8' encoding to the bytearray
-                matches = self._get_matches(baseRequestResponse.getResponse(), bytearray(grep_string, 'utf-8'))
-                if (len(matches) > 0):
-                    print("Match found for string:", grep_string)
-                    issue = CustomScanIssue(
-                        baseRequestResponse.getHttpService(),
-                        self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
-                        [self._callbacks.applyMarkers(baseRequestResponse, None, matches)],
-                        "Info Leakage",
-                        "The response contains the string: " + grep_string,
-                        "High"
-                    )
-                    issues.append(issue)
-    
+        for grep_string in self.grep_strings_list:
+            matches = self._get_matches(baseRequestResponse.getResponse(), bytearray(grep_string, 'utf-8'))
+            if (len(matches) > 0):
+                print("Match found for string:", grep_string)
+                issue = CustomScanIssue(
+                    baseRequestResponse.getHttpService(),
+                    self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
+                    [self._callbacks.applyMarkers(baseRequestResponse, None, matches)],
+                    "Info Leakage",
+                    "The response contains the string: " + grep_string,
+                    "High"
+                )
+                issues.append(issue)
+
         return issues if issues else None
     
     def doActiveScan(self, baseRequestResponse, insertionPoint):
-        # Active scanning logic goes here
         pass
 
     def consolidateDuplicateIssues(self, existingIssue, newIssue):
@@ -109,7 +108,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         about_panel.setLayout(awt.GridBagLayout())
         gbc = awt.GridBagConstraints()
 
-        about_label = JLabel("Info Leakage Burp Extension - version 1.1.0")
+        about_label = JLabel("Info Leakage Burp Extension - version {}".format(VERSION))
         gbc.gridx = 0
         gbc.gridy = 0
         about_panel.add(about_label, gbc)
@@ -141,6 +140,10 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         global GREP_STRINGS
         GREP_STRINGS = self._grep_strings_area.getText().split("\n")
         self._callbacks.saveExtensionSetting("grep_strings", json.dumps(GREP_STRINGS))
+        self.grep_strings_list = GREP_STRINGS
+        # Show a popup indicating that the settings have been saved successfully
+        JOptionPane.showMessageDialog(None, "Search terms have been saved successfully.", "Info", JOptionPane.INFORMATION_MESSAGE)
+
 
     def _load_grep_strings(self):
         global GREP_STRINGS
@@ -148,6 +151,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         if grep_strings_str:
             GREP_STRINGS = json.loads(grep_strings_str)
             self._grep_strings_area.setText("\n".join(GREP_STRINGS))
+            self.grep_strings_list = GREP_STRINGS
 
     # Implement ITab
     def getTabCaption(self):
