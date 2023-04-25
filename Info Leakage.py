@@ -55,6 +55,10 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
                     issues.append(issue)
     
         return issues if issues else None
+    
+    def doActiveScan(self, baseRequestResponse, insertionPoint):
+        # Active scanning logic goes here
+        pass
 
     def consolidateDuplicateIssues(self, existingIssue, newIssue):
         if existingIssue.getIssueName() == newIssue.getIssueName() and existingIssue.getIssueDetail() == newIssue.getIssueDetail():
