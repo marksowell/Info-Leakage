@@ -46,6 +46,8 @@ The ```sensitive_info_terms.json``` file provides 20 sensitive information terms
 
 When using these search terms, it's important to understand that false positives can occur. Be sure to carefully review and validate each finding to ensure it's a legitimate information leakage.
 
+<b>Limitation</b>: The Info Leakage extension cannot passively intercept and scan HTTP responses when the Burp Proxy is in invisible mode. However, initiating an active scan in Burp can be used as an alternative method to scan the responses for the search terms.
+
 ***Check out my other Burp Suite extension [Findings Tracker](https://github.com/marksowell/Findings-Tracker)***
 
 ## License
