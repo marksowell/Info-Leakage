@@ -26,7 +26,7 @@ If you need to setup Jython you can follow these steps:
 
 ## Installation
 
-1. Download ```Info Leakage.py```
+1. Download ```info-leakage.py```
 
 2. Open Burp Suite and go to the "Extender" tab.
 
@@ -34,7 +34,7 @@ If you need to setup Jython you can follow these steps:
 
 4. Click the "Add" button, and in the "Add extension" dialog, select "Python" from the "Extension type" dropdown.
 
-5. Click "Select file..." and browse to the location where you have saved the ```Info Leakage.py``` Python script for the Burp Suite extension.
+5. Click "Select file..." and browse to the location where you have saved the ```info-leakage.py``` Python script for the Burp Suite extension.
 
 Click "Next" to load the extension. If everything is configured correctly, you should see a message that says "Extension loaded successfully." You should now see the extension listed in the "Loaded extensions" section.
 
